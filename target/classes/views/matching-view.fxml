@@ -1,0 +1,44 @@
+<!-- 
+matching-view.fxml 
+The screen where users can find and filter potential study partners.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="20.0" styleClass="content-pane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="studypartner.controller.MatchingController">
+   <children>
+      <Label styleClass="section-header" text="Find Study Partners" />
+      <HBox spacing="10.0">
+         <children>
+            <ComboBox fx:id="subjectFilterComboBox" promptText="Filter by Subject" HBox.hgrow="ALWAYS" />
+            <ComboBox fx:id="availabilityFilterComboBox" promptText="Filter by Availability" HBox.hgrow="ALWAYS" />
+            <Button fx:id="applyFiltersButton" mnemonicParsing="false" onAction="#handleApplyFilters" styleClass="action-button" text="Apply Filters" />
+         </children>
+      </HBox>
+      <StackPane VBox.vgrow="ALWAYS">
+         <children>
+            <ScrollPane fx:id="matchesScrollPane" fitToWidth="true" styleClass="matches-scroll-pane">
+               <content>
+                  <VBox fx:id="matchesContainer" spacing="15.0">
+                     <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </ScrollPane>
+            <Label fx:id="noMatchesLabel" styleClass="no-matches-label" text="No matching study partners found. Try adjusting your filters." visible="false" />
+         </children>
+      </StackPane>
+   </children>
+   <padding>
+      <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+   </padding>
+</VBox>
