@@ -1,4 +1,4 @@
-package src.main.java.studypartner.util;
+package studypartner.util;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;

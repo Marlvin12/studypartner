@@ -1,4 +1,4 @@
-package src.main.java.studypartner.model;
+package studypartner.model;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;

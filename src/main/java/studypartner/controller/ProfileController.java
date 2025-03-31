@@ -1,4 +1,4 @@
-package src.main.java.studypartner.controller;
+package studypartner.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

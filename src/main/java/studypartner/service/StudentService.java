@@ -1,4 +1,4 @@
-package src.main.java.studypartner.service;
+package studypartner.service;
 
 import studypartner.model.Student;
 import studypartner.model.Subject;

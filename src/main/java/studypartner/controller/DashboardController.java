@@ -1,5 +1,5 @@
-package src.main.java.studypartner.controller;
-
+package studypartner.controller;
+import javafx.fxml.FXMLLoader;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
