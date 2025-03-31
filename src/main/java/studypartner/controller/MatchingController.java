@@ -14,7 +14,6 @@ import studypartner.model.Subject;
 import studypartner.service.ChatService;
 import studypartner.service.StudentService;
 import studypartner.service.StudentService.MatchResult;
-import studypartner.util.DialogUtils;
 import studypartner.util.NavigationManager;
 import studypartner.util.SessionManager;
 
