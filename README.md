@@ -42,10 +42,11 @@
 - **Maven 3.6** or higher
 
 ---
-
+![Screenshot 2025-04-01 at 10 39 54 AM](https://github.com/user-attachments/assets/3cb6b754-7752-4584-ad53-36e78930857c)
 ## Setup Instructions
 
 ### 1. Clone the Repository
+
 
 ```bash
 git clone https://github.com/yourusername/studypartner.git
@@ -59,6 +60,7 @@ cd studypartner
 
 Download JavaFX SDK from https://gluonhq.com/products/javafx/
 Extract it to a location on your computer
+
 
 3. Running the Application
 Option A: Using Maven
