@@ -1,37 +1,56 @@
-Study Partner Finder Application
-Overview
-Study Partner Finder is a JavaFX application designed to help students connect with peers who are studying the same subjects and have compatible schedules. The application allows users to create profiles, find study partners based on shared interests and availability, and communicate through an integrated messaging system.
-Features
+# Study Partner Finder Application
 
+## Overview
 
-User registration and authentication: Create an account or log in securely
-![Login](https://github.com/user-attachments/assets/efebde00-0678-4a9a-ab9f-9ad327ae726d)
+**Study Partner Finder** is a JavaFX application designed to help students connect with peers who share similar study interests and compatible schedules. With user-friendly profile creation, intelligent matching based on subjects and availability, and an integrated messaging system, this application streamlines the process of finding and collaborating with the perfect study partner.
 
-![logout](https://github.com/user-attachments/assets/18afb8a9-98f0-441b-98d5-383fbb065161)
+---
 
-Profile management: Edit personal information, add academic subjects, and set availability schedules
-![dashboard](https://github.com/user-attachments/assets/ce845b10-4adf-4174-97b7-1dbc27585ac6)
-![dashboard2](https://github.com/user-attachments/assets/022e18ea-9fa4-4ab0-91a2-a515af8bf471)
+## Features
 
-Smart matching algorithm: Find compatible study partners based on subject overlap and time availability
-![find_partner](https://github.com/user-attachments/assets/c9b67403-b42a-49e2-a715-8d7ca73dc187)
+### User Registration and Authentication
+- **Secure Account Creation:** Easily create an account or log in.
+- **Visuals:**
+  - ![Login](https://github.com/user-attachments/assets/efebde00-0678-4a9a-ab9f-9ad327ae726d)
+  - ![Logout](https://github.com/user-attachments/assets/18afb8a9-98f0-441b-98d5-383fbb065161)
 
+### Profile Management
+- **Personalization:** Edit personal information, add academic subjects, and set your availability schedule.
+- **Visuals:**
+  - ![Dashboard 1](https://github.com/user-attachments/assets/ce845b10-4adf-4174-97b7-1dbc27585ac6)
+  - ![Dashboard 2](https://github.com/user-attachments/assets/022e18ea-9fa4-4ab0-91a2-a515af8bf471)
 
-Real-time messaging system: Communicate directly with potential study partners
-![messages](https://github.com/user-attachments/assets/7a0d64d3-b195-4deb-8049-246c8562017c)
+### Smart Matching Algorithm
+- **Intelligent Pairing:** Find compatible study partners based on subject overlap and available times.
+- **Visual:**
+  - ![Find Partner](https://github.com/user-attachments/assets/c9b67403-b42a-49e2-a715-8d7ca73dc187)
 
+### Real-Time Messaging System
+- **Direct Communication:** Chat directly with potential study partners.
+- **Visual:**
+  - ![Messages](https://github.com/user-attachments/assets/7a0d64d3-b195-4deb-8049-246c8562017c)
 
+### Intuitive User Interface
+- **Clean & Responsive:** Enjoy a seamless and engaging user experience.
 
-Intuitive user interface: Clean, responsive design for a seamless user experience
+---
 
-Prerequisites
+## Prerequisites
 
-Java JDK 11 or higher
-JavaFX 17 or higher
-Maven 3.6 or higher
+- **Java JDK 11** or higher
+- **JavaFX 17** or higher
+- **Maven 3.6** or higher
 
-Setup Instructions
-1. Clone the Repository
+---
+
+## Setup Instructions
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/studypartner.git
+cd studypartner
+
    
 git clone https://github.com/yourusername/studypartner.git
 cd studypartner
