@@ -1,93 +1,71 @@
 Study Partner Finder Application
 Overview
-
 Study Partner Finder is a JavaFX application designed to help students connect with peers who are studying the same subjects and have compatible schedules. The application allows users to create profiles, find study partners based on shared interests and availability, and communicate through an integrated messaging system.
 Features
 
-    User registration and authentication
-    Profile management with academic subjects and availability scheduling
-    Smart matching algorithm to find compatible study partners
-    Real-time messaging system
-    Intuitive and responsive user interface
 
-    Java JDK 11 or higher
-    Maven 3.6 or higher
+User registration and authentication: Create an account or log in securely
+![Login](https://github.com/user-attachments/assets/efebde00-0678-4a9a-ab9f-9ad327ae726d)
+
+![logout](https://github.com/user-attachments/assets/18afb8a9-98f0-441b-98d5-383fbb065161)
+
+Profile management: Edit personal information, add academic subjects, and set availability schedules
+![dashboard](https://github.com/user-attachments/assets/ce845b10-4adf-4174-97b7-1dbc27585ac6)
+![dashboard2](https://github.com/user-attachments/assets/022e18ea-9fa4-4ab0-91a2-a515af8bf471)
+
+Smart matching algorithm: Find compatible study partners based on subject overlap and time availability
+![find_partner](https://github.com/user-attachments/assets/c9b67403-b42a-49e2-a715-8d7ca73dc187)
+
+
+Real-time messaging system: Communicate directly with potential study partners
+![messages](https://github.com/user-attachments/assets/7a0d64d3-b195-4deb-8049-246c8562017c)
+
+
+
+Intuitive user interface: Clean, responsive design for a seamless user experience
+
+Prerequisites
+
+Java JDK 11 or higher
+JavaFX 17 or higher
+Maven 3.6 or higher
 
 Setup Instructions
 1. Clone the Repository
-
-bash
-
-git clone <repository-url>
+   
+git clone https://github.com/yourusername/studypartner.git
 cd studypartner
 
-2. Install Dependencies
+2. Install JavaFX SDK
 
-The project uses Maven for dependency management. All required dependencies are specified in the pom.xml file.
-3. Run the Application
+Download JavaFX SDK from https://gluonhq.com/products/javafx/
+Extract it to a location on your computer
 
-bash
+3. Running the Application
+Option A: Using Maven
+mvn clean compile exec:java -Dexec.mainClass="studypartner.StudyPartnerApp"
 
-mvn javafx:run
+Option B: Using the run script (Recommended for macOS users)
 
-4. Build the Application
+Create a file called run.sh with the following content:
 
-bash
+#!/bin/bash
 
-mvn clean package
+# Set the path to your JavaFX SDK - update this to your actual path!
+JAVAFX_PATH=/path/to/your/javafx-sdk/lib
 
-Development Guidelines
-Adding New Features
+# Compile the project
+mvn clean compile
 
-    Create or modify model classes in the model package
-    Update service classes as needed in the service package
-    Design the UI using FXML (add new views to the resources/views directory)
-    Implement controller logic in the controller package
-    Update CSS styles in resources/css/styles.css
+# Run the application with special flags
+java \
+  --module-path "$JAVAFX_PATH" \
+  --add-modules javafx.controls,javafx.fxml \
+  -Dglass.disableThreadChecks=true \
+  -Dprism.order=sw \
+  -cp target/classes studypartner.StudyPartnerApp
 
-Coding Conventions
-
-    Follow Java naming conventions
-    Add JavaDoc comments for all public methods
-    Use MVC (Model-View-Controller) pattern
-    Handle exceptions properly
-    Validate user input
-
-Testing
-
-The application includes sample data for testing. Use these credentials to log in:
-
-    Email: alice@example.com, Password: password
-    Email: bob@example.com, Password: password
-
-Troubleshooting
-Common Issues
-
-    Build Errors: Make sure Maven is installed correctly and your JDK version matches the one specified in pom.xml
-    Runtime Errors: Check that all the resources (CSS, FXML, images) are in the correct directories
-    JavaFX Issues: Ensure that JavaFX dependencies are correctly resolved by Maven
-
-Debugging Tips
-
-    Check console output for error messages
-    Use the DialogUtils class for displaying error information to users
-    Set proper breakpoints in your IDE to trace execution flow
-
-Future Enhancements
-
-    Database integration for persistent storage
-    Advanced filtering options for partner matching
-    Group study session coordination
-    Calendar integration
-    Video chat capabilities
-
-Contributing
-
-    Create a branch for your feature
-    Write clean, well-documented code
-    Test thoroughly
-    Submit a pull request with a clear description of your changes
-
-License
-
-[Your license information here]
+Make the script executable:
+chmod +x run.sh
+Run the application:
+./run.sh
