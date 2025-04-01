@@ -1,14 +1,15 @@
 package studypartner.controller;
+
 import javafx.fxml.FXMLLoader;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import studypartner.model.Student;
 import studypartner.service.ChatService;
@@ -88,7 +89,7 @@ public class DashboardController {
     private void loadProfileView() {
         try {
             // Load profile view into content pane
-            Pane profileView = FXMLLoader.load(getClass().getResource("/views/profile-view.fxml"));
+            Parent profileView = FXMLLoader.load(getClass().getResource("/views/profile-view.fxml"));
             contentPane.getChildren().clear();
             contentPane.getChildren().add(profileView);
             
@@ -107,7 +108,7 @@ public class DashboardController {
     private void loadMatchingView() {
         try {
             // Load matching view into content pane
-            Pane matchingView = FXMLLoader.load(getClass().getResource("/views/matching-view.fxml"));
+            Parent matchingView = FXMLLoader.load(getClass().getResource("/views/matching-view.fxml"));
             contentPane.getChildren().clear();
             contentPane.getChildren().add(matchingView);
             
@@ -126,7 +127,7 @@ public class DashboardController {
     private void loadChatView() {
         try {
             // Load chat view into content pane
-            Pane chatView = FXMLLoader.load(getClass().getResource("/views/chat-view.fxml"));
+            Parent chatView = FXMLLoader.load(getClass().getResource("/views/chat-view.fxml"));
             contentPane.getChildren().clear();
             contentPane.getChildren().add(chatView);
             

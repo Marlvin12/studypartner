@@ -144,18 +144,29 @@ public class ChatController {
         String otherStudentId = conversation.getOtherStudentId(currentStudent.getId());
         Student otherStudent = StudentService.getInstance().getStudentById(otherStudentId);
         
-        // Update chat header
-        chatTitleLabel.setText(otherStudent.getName());
-        try {
-            Image image = new Image(getClass().getResourceAsStream(otherStudent.getProfileImageUrl()));
-            chatProfileImage.setImage(image);
-        } catch (Exception e) {
-            // Use default image
+        // Add null check here
+        if (otherStudent == null) {
+            chatTitleLabel.setText("Unknown User");
             try {
                 Image defaultImage = new Image(getClass().getResourceAsStream("/images/default-profile.png"));
                 chatProfileImage.setImage(defaultImage);
             } catch (Exception ex) {
                 System.err.println("Error loading default profile image: " + ex.getMessage());
+            }
+        } else {
+            // Update chat header
+            chatTitleLabel.setText(otherStudent.getName());
+            try {
+                Image image = new Image(getClass().getResourceAsStream(otherStudent.getProfileImageUrl()));
+                chatProfileImage.setImage(image);
+            } catch (Exception e) {
+                // Use default image
+                try {
+                    Image defaultImage = new Image(getClass().getResourceAsStream("/images/default-profile.png"));
+                    chatProfileImage.setImage(defaultImage);
+                } catch (Exception ex) {
+                    System.err.println("Error loading default profile image: " + ex.getMessage());
+                }
             }
         }
         
@@ -214,6 +225,20 @@ public class ChatController {
             // Get other student
             String otherStudentId = conversation.getOtherStudentId(currentStudent.getId());
             Student otherStudent = StudentService.getInstance().getStudentById(otherStudentId);
+            
+            // Handle null student (add this check)
+            if (otherStudent == null) {
+                // Create simple container with unknown user
+                HBox container = new HBox();
+                container.getStyleClass().add("conversation-cell");
+                
+                Label unknownLabel = new Label("Unknown User");
+                unknownLabel.getStyleClass().add("conversation-name");
+                
+                container.getChildren().add(unknownLabel);
+                setGraphic(container);
+                return;
+            }
             
             // Create container
             HBox container = new HBox();
