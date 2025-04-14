@@ -31,7 +31,7 @@ public class MatchingController {
     @FXML private ScrollPane matchesScrollPane;
     @FXML private VBox matchesContainer;
     @FXML private Label noMatchesLabel;
-    
+
     private Student currentStudent;
     private List<MatchResult> allMatches;
     
@@ -228,14 +228,15 @@ public class MatchingController {
      * @param student The student to chat with
      */
     private void startChat(Student student) {
+
         // Create or get existing conversation
         ChatService.getInstance().getOrCreateConversation(
                 currentStudent.getId(), student.getId());
-        
+
         // Navigate to chat view
         NavigationManager.setData("selectedStudentId", student.getId());
         NavigationManager.navigateTo("/views/dashboard-view.fxml");
-        
+
         // Select chat tab
         // Note: This is handled in the dashboard controller
     }

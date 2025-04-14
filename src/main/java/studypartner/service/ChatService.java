@@ -1,8 +1,15 @@
 package studypartner.service;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Updates;
+import org.bson.Document;
+import org.bson.types.ObjectId;
 import studypartner.model.Conversation;
 import studypartner.model.Message;
+import studypartner.util.MongoDBClient;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,12 +19,13 @@ import java.util.stream.Collectors;
  */
 public class ChatService {
     private static ChatService instance;
-    private List<Conversation> conversations = new ArrayList<>();
+    private final MongoCollection<Document> conversationCollection;
     
     // Private constructor for singleton
     private ChatService() {
         // Initialize with some sample data
-        initializeSampleData();
+        MongoDatabase db = MongoDBClient.getDatabase();
+        conversationCollection = db.getCollection("conversations");
     }
     
     /**
@@ -31,26 +39,8 @@ public class ChatService {
         }
         return instance;
     }
-    
-    /**
-     * Initializes sample data for testing.
-     */
-    private void initializeSampleData() {
-        // Create a conversation between students 1 and 2
-        Conversation conversation1 = new Conversation("1", "2");
-        conversation1.addMessage(new Message("1", "Hi Bob, are you free to study CS201 together?"));
-        conversation1.addMessage(new Message("2", "Sure Alice! How about Monday at noon?"));
-        conversation1.addMessage(new Message("1", "That works for me. Let's meet at the library."));
-        
-        // Create a conversation between students 1 and 3
-        Conversation conversation2 = new Conversation("1", "3");
-        conversation2.addMessage(new Message("1", "Hi Carol, would you like to form a study group for Math101?"));
-        conversation2.addMessage(new Message("3", "That sounds great! When were you thinking?"));
-        
-        // Add conversations to list
-        conversations.add(conversation1);
-        conversations.add(conversation2);
-    }
+
+
     
     /**
      * Gets all conversations for a student.
@@ -59,11 +49,19 @@ public class ChatService {
      * @return List of conversations
      */
     public List<Conversation> getConversationsForStudent(String studentId) {
-        return conversations.stream()
-                .filter(c -> c.getStudent1Id().equals(studentId) || c.getStudent2Id().equals(studentId))
-                .collect(Collectors.toList());
+        List<Conversation> conversations = new ArrayList<>();
+        Document query = new Document("$or", List.of(
+                new Document("student1Id", studentId),
+                new Document("student2Id", studentId)
+        ));
+
+        conversationCollection.find(query).forEach(doc ->
+                conversations.add(mapDocumentToConversation(doc))
+        );
+        return conversations;
     }
-    
+
+
     /**
      * Gets a conversation by ID.
      * 
@@ -71,12 +69,10 @@ public class ChatService {
      * @return The conversation or null if not found
      */
     public Conversation getConversationById(String conversationId) {
-        return conversations.stream()
-                .filter(c -> c.getId().equals(conversationId))
-                .findFirst()
-                .orElse(null);
+        Document query = new Document("_id", new ObjectId(conversationId));
+        Document doc = conversationCollection.find(query).first();
+        return doc != null ? mapDocumentToConversation(doc) : null;
     }
-    
     /**
      * Gets or creates a conversation between two students.
      * 
@@ -85,18 +81,26 @@ public class ChatService {
      * @return The existing or new conversation
      */
     public Conversation getOrCreateConversation(String student1Id, String student2Id) {
-        // Check if conversation already exists
-        for (Conversation conversation : conversations) {
-            if ((conversation.getStudent1Id().equals(student1Id) && conversation.getStudent2Id().equals(student2Id)) ||
-                (conversation.getStudent1Id().equals(student2Id) && conversation.getStudent2Id().equals(student1Id))) {
-                return conversation;
-            }
+        // Check if conversation exists
+        Document query = new Document("$or", List.of(
+                new Document("student1Id", student1Id).append("student2Id", student2Id),
+                new Document("student1Id", student2Id).append("student2Id", student1Id)
+        ));
+
+        Document existingConversation = conversationCollection.find(query).first();
+        if (existingConversation != null) {
+            return mapDocumentToConversation(existingConversation);
         }
-        
+
         // Create new conversation
-        Conversation newConversation = new Conversation(student1Id, student2Id);
-        conversations.add(newConversation);
-        return newConversation;
+        Document newConversation = new Document()
+                .append("student1Id", student1Id)
+                .append("student2Id", student2Id)
+                .append("messages", new ArrayList<>())
+                .append("createdAt", Instant.now());
+
+        conversationCollection.insertOne(newConversation);
+        return mapDocumentToConversation(newConversation);
     }
     
     /**
@@ -106,10 +110,16 @@ public class ChatService {
      * @param message The message to add
      */
     public void addMessageToConversation(String conversationId, Message message) {
-        Conversation conversation = getConversationById(conversationId);
-        if (conversation != null) {
-            conversation.addMessage(message);
-        }
+        Document messageDoc = new Document()
+                .append("senderId", message.getSenderId())
+                .append("content", message.getContent())
+                .append("timestamp", message.getTimestamp())
+                .append("read", message.isRead());
+
+        conversationCollection.updateOne(
+                new Document("_id", new ObjectId(conversationId)),
+                Updates.push("messages", messageDoc)
+        );
     }
     
     /**
@@ -119,14 +129,18 @@ public class ChatService {
      * @param studentId The student ID
      */
     public void markConversationAsRead(String conversationId, String studentId) {
-        Conversation conversation = getConversationById(conversationId);
-        if (conversation != null) {
-            for (Message message : conversation.getMessages()) {
-                if (!message.getSenderId().equals(studentId) && !message.isRead()) {
-                    message.setRead(true);
-                }
-            }
-        }
+        Document query = new Document("_id", new ObjectId(conversationId));
+        Document update = new Document("$set", new Document(
+                "messages.$[elem].read", true
+        ));
+
+        Document arrayFilter = new Document("elem.senderId",
+                new Document("$ne", studentId))
+                .append("elem.read", false);
+
+        conversationCollection.updateOne(query, update,
+                new com.mongodb.client.model.UpdateOptions()
+                        .arrayFilters(List.of(arrayFilter)));
     }
     
     /**
@@ -137,13 +151,36 @@ public class ChatService {
      */
     public int getUnreadMessageCount(String studentId) {
         int count = 0;
-        for (Conversation conversation : getConversationsForStudent(studentId)) {
-            for (Message message : conversation.getMessages()) {
-                if (!message.getSenderId().equals(studentId) && !message.isRead()) {
-                    count++;
-                }
-            }
+        List<Conversation> conversations = getConversationsForStudent(studentId);
+
+        for (Conversation conversation : conversations) {
+            count += (int) conversation.getMessages().stream()
+                    .filter(m -> !m.getSenderId().equals(studentId) && !m.isRead())
+                    .count();
         }
         return count;
+    }
+
+    private Conversation mapDocumentToConversation(Document doc) {
+        Conversation conversation = new Conversation(
+                doc.getObjectId("_id").toString(),
+                doc.getString("student1Id"),
+                doc.getString("student2Id")
+        );
+
+        List<Document> messageDocs = doc.getList("messages", Document.class);
+        if (messageDocs != null) {
+            List<Message> messages = messageDocs.stream()
+                    .map(messageDoc -> new Message(
+                            messageDoc.getString("senderId"),
+                            messageDoc.getString("content"),
+                            messageDoc.getDate("timestamp"),
+                            messageDoc.getBoolean("read", false)
+                    ))
+                    .collect(Collectors.toList());
+            conversation.setMessages(messages);
+        }
+
+        return conversation;
     }
 }

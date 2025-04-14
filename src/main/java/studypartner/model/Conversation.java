@@ -3,7 +3,6 @@ package studypartner.model;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Represents a conversation between two students.
@@ -15,8 +14,8 @@ public class Conversation {
     private List<Message> messages = new ArrayList<>();
     private LocalDateTime lastMessageTime;
     
-    public Conversation(String student1Id, String student2Id) {
-        this.id = UUID.randomUUID().toString();
+    public Conversation(String id, String student1Id, String student2Id) {
+        this.id = id;
         this.student1Id = student1Id;
         this.student2Id = student2Id;
         this.lastMessageTime = LocalDateTime.now();
@@ -25,6 +24,13 @@ public class Conversation {
     public void addMessage(Message message) {
         messages.add(message);
         lastMessageTime = message.getTimestamp();
+    }
+
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
+        if (!messages.isEmpty()) {
+            lastMessageTime = messages.get(messages.size() - 1).getTimestamp();
+        }
     }
     
     // Getters and setters

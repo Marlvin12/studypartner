@@ -14,10 +14,19 @@ fi
 # Compile the project
 mvn clean compile
 
-# Run the application with special macOS flags
+# Get the full Maven classpath
+CP=$(mvn dependency:build-classpath -Dmdep.outputFile=cp.txt && cat cp.txt)
+
+# Add your target/classes and JavaFX libs to the classpath
+FULL_CP="target/classes:$CP:$JAVAFX_PATH/*"
+
+# Run the app
 java \
   --module-path "$JAVAFX_PATH" \
   --add-modules javafx.controls,javafx.fxml \
   -Dglass.disableThreadChecks=true \
   -Dprism.order=sw \
-  -cp target/classes studypartner.StudyPartnerApp
+  -cp "$FULL_CP" \
+  studypartner.StudyPartnerApp
+
+rm cp.txt

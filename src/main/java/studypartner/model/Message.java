@@ -1,6 +1,8 @@
 package studypartner.model;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -13,12 +15,12 @@ public class Message {
     private LocalDateTime timestamp;
     private boolean read;
     
-    public Message(String senderId, String content) {
+    public Message(String senderId, String content, Date timestamp, Boolean read) {
         this.id = UUID.randomUUID().toString();
         this.senderId = senderId;
         this.content = content;
-        this.timestamp = LocalDateTime.now();
-        this.read = false;
+        this.timestamp = timestamp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();;
+        this.read = read;
     }
     
     // Getters and setters

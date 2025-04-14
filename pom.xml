@@ -30,6 +30,11 @@
             <artifactId>javafx-graphics</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>4.11.0</version>
+        </dependency>
     </dependencies>
     
     <build>
@@ -40,6 +45,7 @@
                 <version>3.1.0</version>
                 <configuration>
                     <mainClass>studypartner.StudyPartnerApp</mainClass>
+                    <classpathScope>runtime</classpathScope>
                     <environmentVariables>
                         <GLASS_DISABLE_THREAD_CHECKS>true</GLASS_DISABLE_THREAD_CHECKS>
                     </environmentVariables>

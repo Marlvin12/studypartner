@@ -2,11 +2,7 @@ package studypartner.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import studypartner.model.Student;
+import javafx.scene.control.*;
 import studypartner.service.StudentService;
 import studypartner.util.DialogUtils;
 import studypartner.util.NavigationManager;
@@ -42,15 +38,42 @@ public class LoginController {
         
         String email = emailField.getText().trim();
         String password = passwordField.getText();
-        
-        Student student = StudentService.getInstance().authenticate(email, password);
-        
-        if (student != null) {
-            SessionManager.getInstance().setCurrentStudent(student);
-            NavigationManager.navigateTo("/views/dashboard-view.fxml");
-        } else {
-            DialogUtils.showError("Login Failed", "Invalid Credentials", 
-                    "The email or password you entered is incorrect.");
+
+
+        try {
+            loginButton.setDisable(true);
+
+            StudentService.getInstance().authenticateAsync(email, password).thenAccept(student -> {
+                javafx.application.Platform.runLater(() -> {
+                    loginButton.setDisable(false);
+                    if (student != null) {
+                        SessionManager.getInstance().setCurrentStudent(student);
+                        NavigationManager.navigateTo("/views/dashboard-view.fxml");
+                    } else {
+                        DialogUtils.showError("Login Failed", "Invalid Credentials",
+                                "The email or password you entered is incorrect.");
+                    }
+                });
+            }).exceptionally(ex -> {
+                javafx.application.Platform.runLater(() -> {
+                    loginButton.setDisable(false);
+                    DialogUtils.showError("Login Error", "Something went wrong", ex.getMessage());
+                });
+                return null;
+            });
+        } catch (Exception e) {
+            System.err.println("Root cause:");
+            Throwable rootCause = e;
+            while (rootCause.getCause() != null) {
+                rootCause = rootCause.getCause();
+            }
+            rootCause.printStackTrace();
+
+            // Optionally show error to user
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setContentText("Error: " + rootCause.getMessage());
+            alert.showAndWait();
         }
     }
     

@@ -1,22 +1,29 @@
 package studypartner.service;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.types.ObjectId;
 import studypartner.model.Student;
 import studypartner.model.Subject;
 import studypartner.model.TimeSlot;
 
+import org.bson.Document;
+import studypartner.util.MongoDBClient;
+
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class StudentService {
     private static StudentService instance;
     private List<Student> students = new ArrayList<>();
-    
+    private final MongoCollection<Document> studentCollection;
+
     private StudentService() {
-        initializeSampleData();
+        MongoDatabase db = MongoDBClient.getDatabase();
+        studentCollection = db.getCollection("students");
     }
     
     public static synchronized StudentService getInstance() {
@@ -25,66 +32,134 @@ public class StudentService {
         }
         return instance;
     }
-    
-    private void initializeSampleData() {
-        Subject math101 = new Subject("MATH101", "Introduction to Calculus");
-        Subject cs201 = new Subject("CS201", "Data Structures");
-        Subject cs301 = new Subject("CS301", "Algorithms");
-        Subject phys201 = new Subject("PHYS201", "Physics II");
-        Subject chem101 = new Subject("CHEM101", "General Chemistry");
-        Subject bio201 = new Subject("BIO201", "Cell Biology");
-        
-        Student alice = new Student("1", "Alice Johnson", "alice@example.com", "password", 
-                "Computer Science", 2, "I'm a CS major looking for study partners for algorithm courses.");
-        alice.addSubject(math101);
-        alice.addSubject(cs201);
-        alice.addSubject(cs301);
-        alice.addTimeSlot(new TimeSlot(DayOfWeek.MONDAY, LocalTime.of(10, 0), LocalTime.of(12, 0)));
-        alice.addTimeSlot(new TimeSlot(DayOfWeek.WEDNESDAY, LocalTime.of(14, 0), LocalTime.of(16, 0)));
-        alice.setProfileImageUrl("/images/profile-1.png");
-        
-        Student bob = new Student("2", "Bob Smith", "bob@example.com", "password",
-                "Computer Science", 3, "Looking to ace my programming assignments. Happy to help others too!");
-        bob.addSubject(cs201);
-        bob.addSubject(cs301);
-        bob.addTimeSlot(new TimeSlot(DayOfWeek.MONDAY, LocalTime.of(11, 0), LocalTime.of(13, 0)));
-        bob.addTimeSlot(new TimeSlot(DayOfWeek.THURSDAY, LocalTime.of(9, 0), LocalTime.of(11, 0)));
-        bob.setProfileImageUrl("/images/profile-2.png");
-        
-        students.addAll(Arrays.asList(alice, bob));
+
+    public CompletableFuture<Student> authenticateAsync(String email, String password) {
+        return CompletableFuture.supplyAsync(() -> {
+            Document query = new Document("email", email).append("password", password);
+            Document result = studentCollection.find(query).first();
+            if (result != null) {
+                return mapDocumentToStudent(result);
+            }
+            return null;
+
+        });
     }
-    
+
+    private Student mapDocumentToStudent(Document doc) {
+        Student student = new Student(
+                doc.getObjectId("_id").toString(),
+                doc.getString("name"),
+                doc.getString("email"),
+                doc.getString("password"),
+                doc.getString("major"),
+                doc.getInteger("yearOfStudy", 1),
+                doc.getString("bio")
+        );
+        student.setProfileImageUrl(doc.getString("profileImageUrl"));
+
+        List<Document> subjectDocs = doc.getList("subjects", Document.class);
+        if (subjectDocs != null) {
+            List<Subject> subjects = subjectDocs.stream()
+                    .map(subjectDoc -> new Subject(
+                            subjectDoc.getString("name"),
+                            subjectDoc.getString("code")
+                    ))
+                    .collect(Collectors.toList());
+            student.setSubjects(subjects);
+        }
+
+        List<Document> availabilityDocs = doc.getList("availability", Document.class);
+        if (availabilityDocs != null) {
+            List<TimeSlot> availability = availabilityDocs.stream()
+                    .map(timeSlotDoc -> new TimeSlot(
+                            DayOfWeek.valueOf(timeSlotDoc.getString("dayOfWeek")),
+                            LocalTime.parse(timeSlotDoc.getString("startTime")),
+                            LocalTime.parse(timeSlotDoc.getString("endTime"))
+                    ))
+                    .collect(Collectors.toList());
+            student.setAvailability(availability);
+        }
+        return student;
+    }
+
     public Student authenticate(String email, String password) {
         return students.stream()
                 .filter(s -> s.getEmail().equals(email) && s.getPassword().equals(password))
                 .findFirst()
                 .orElse(null);
     }
-    
+
+
     public Student getStudentById(String id) {
-        return students.stream()
-                .filter(s -> s.getId().equals(id))
-                .findFirst()
-                .orElse(null);
+        Document query = new Document("_id", new ObjectId(id));
+        Document result = studentCollection.find(query).first();
+        return result != null ? mapDocumentToStudent(result) : null;
     }
-    
+
     public List<Student> getOtherStudents(String currentStudentId) {
-        return students.stream()
-                .filter(s -> !s.getId().equals(currentStudentId))
-                .collect(Collectors.toList());
+        Document query = new Document("_id", new Document("$ne", new ObjectId(currentStudentId)));
+        List<Student> otherStudents = new ArrayList<>();
+        studentCollection.find(query).forEach(doc ->
+                otherStudents.add(mapDocumentToStudent(doc))
+        );
+        return otherStudents;
     }
-    
+
     public void addStudent(Student student) {
-        students.add(student);
+        Document doc = new Document()
+                .append("name", student.getName())
+                .append("email", student.getEmail())
+                .append("password", student.getPassword())
+                .append("major", student.getMajor())
+                .append("yearOfStudy", student.getYearOfStudy())
+                .append("bio", student.getBio())
+                .append("profileImageUrl", student.getProfileImageUrl());
+
+        // Convert subjects to documents
+        List<Document> subjectDocs = student.getSubjects().stream()
+                .map(subject -> new Document()
+                        .append("name", subject.getName())
+                        .append("code", subject.getCode()))
+                .collect(Collectors.toList());
+        doc.append("subjects", subjectDocs);
+
+        studentCollection.insertOne(doc);
     }
-    
+
     public void updateStudent(Student student) {
-        for (int i = 0; i < students.size(); i++) {
-            if (students.get(i).getId().equals(student.getId())) {
-                students.set(i, student);
-                break;
-            }
-        }
+        Document query = new Document("_id", new ObjectId(student.getId()));
+
+        // Convert subjects to documents
+        List<Document> subjectDocs = student.getSubjects().stream()
+                .map(subject -> new Document()
+                        .append("name", subject.getName())
+                        .append("code", subject.getCode()))
+                .collect(Collectors.toList());
+
+        // Convert TimeSlots to documents
+        List<Document> availabilityDocs = student.getAvailability().stream()
+                .map(timeSlot -> new Document()
+                        .append("dayOfWeek", timeSlot.getDay().toString())
+                        .append("startTime", timeSlot.getStartTime().toString())
+                        .append("endTime", timeSlot.getEndTime().toString()))
+                .collect(Collectors.toList());
+
+        // All updates go under $set
+        Document setData = new Document()
+                .append("name", student.getName())
+                .append("email", student.getEmail())
+                .append("password", student.getPassword())
+                .append("major", student.getMajor())
+                .append("yearOfStudy", student.getYearOfStudy())
+                .append("bio", student.getBio())
+                .append("profileImageUrl", student.getProfileImageUrl())
+                .append("subjects", subjectDocs)
+                .append("availability", availabilityDocs);
+
+
+        Document update = new Document("$set", setData);
+
+        studentCollection.updateOne(query, update);
     }
     
     public List<MatchResult> findMatches(String studentId) {
@@ -100,17 +175,22 @@ public class StudentService {
         matches.sort((m1, m2) -> Integer.compare(m2.getCompatibility(), m1.getCompatibility()));
         return matches;
     }
-    
+
     public List<Subject> getAllSubjects() {
-        List<Subject> allSubjects = new ArrayList<>();
-        for (Student student : students) {
-            for (Subject subject : student.getSubjects()) {
-                if (!allSubjects.contains(subject)) {
-                    allSubjects.add(subject);
-                }
+        Set<Subject> uniqueSubjects = new HashSet<>();
+        studentCollection.find().forEach(doc -> {
+            List<Document> subjectDocs = doc.getList("subjects", Document.class);
+            if (subjectDocs != null) {
+                subjectDocs.forEach(subjectDoc -> {
+                    Subject subject = new Subject(
+                            subjectDoc.getString("name"),
+                            subjectDoc.getString("code")
+                    );
+                    uniqueSubjects.add(subject);
+                });
             }
-        }
-        return allSubjects;
+        });
+        return new ArrayList<>(uniqueSubjects);
     }
     
     public static class MatchResult {

@@ -152,3 +152,41 @@
     -fx-font-weight: bold;
     -fx-text-fill: #2c3e50;
 }
+
+.message-cell {
+    -fx-padding: 10;
+    -fx-background-radius: 5;
+}
+
+.message-sent {
+    -fx-background-color: #007AFF;
+    -fx-alignment: center-right;
+}
+
+.message-sent .message-content {
+    -fx-text-fill: white;
+}
+
+.message-sent .message-sender,
+.message-sent .message-time {
+    -fx-text-fill: #E0E0E0;
+}
+
+.message-received {
+    -fx-background-color: #E9ECEF;
+    -fx-alignment: center-left;
+}
+
+.message-sender {
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.message-time {
+    -fx-font-size: 11px;
+    -fx-text-fill: #666666;
+}
+
+.message-content {
+    -fx-font-size: 14px;
+}
